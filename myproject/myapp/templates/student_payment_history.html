@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment History</title>
+    <script>
+        window.onload = function() {
+            const alertMessage = "{{ alert_message }}";
+            if (alertMessage) {
+                alert(alertMessage);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Payment History</h1>
+    
+    {% for subscription in subscription_data %}
+        <h2>{{ subscription.subscription_name }}</h2>
+        <p>Subscription Price: {{ subscription.subscription_price }}</p>
+        <table border="1">
+            <tr>
+                <th>Month</th>
+                <th>Transaction Status</th>
+                <th>Action</th>
+            </tr>
+            {% for month_data in subscription.months %}
+                <tr>
+                    <td>{{ month_data.month }}</td>
+                    <td>{{ month_data.transaction|yesno:"Completed,Pending" }}</td>
+                    <td>
+                        {% if not month_data.transaction %}
+                            <form method="post" action="{% url 'make_studentpayment' subscription.subscription_id month_data.month%}">
+                                {% csrf_token %}
+                                
+                                <input type="text" name="payment_amount" placeholder="{{ subscription.subscription_price }}" required>
+                                <button type="submit">Make Payment</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+</body>
+</html>
