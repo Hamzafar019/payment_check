@@ -203,8 +203,8 @@ def organization_signup(request):
     context = {'form': form}
     return render(request, 'organization_signup.html', context)
 
-@studentorganizationtransaction_check_required
 @payment_check_required
+@studentorganizationtransaction_check_required
 def student(request):
     print("SS\n")
     return render(request, 'student.html')
@@ -420,31 +420,39 @@ def subscribe(request):
 
     
 
- 
+
 def user_login(request):
     alert = request.GET.get('alert')
     context = {}
     
+    if alert == 'less_payment' or alert == 'organization_clear_dues':
+        context['alert_message'] = 'Your organization does not meet the payment requirements'
     
-    if alert == 'less_payment' or 'organization_clear_dues':
-        context['alert_message'] = 'Your organization do not meet the payment requirements'
-        
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         
-        login(request, user)
+        if user is not None:
+            login(request, user)
+            
+            if user.is_superuser:
+                return redirect('superuser')
+            elif hasattr(user, 'userprofile') and user.userprofile is not None:
+                if user.userprofile.role == 'student':
+                    return redirect('student')
+                elif user.userprofile.role == 'organization':
+                    return redirect('organization')  # Redirect to appropriate view for organization
+            else:
+                # Handle other roles or scenarios here
+                return redirect('login')  # Redirect to login page with error message
         
-        if user.is_superuser:
-            return redirect('superuser')
-        elif hasattr(user, 'userprofile') and user.userprofile is not None:
-            if user.userprofile.role == 'student':
-                return redirect('student')
         else:
-            return redirect('organization')  # Redirect to create student after login
-      
-    return render(request, 'login.html',context)
+            # If user is None, authentication failed
+            context['alert_message'] = 'Username or password is incorrect.'
+            return render(request, 'login.html', context)
+    
+    return render(request, 'login.html', context)
 
 def user_logout(request):
     logout(request)
