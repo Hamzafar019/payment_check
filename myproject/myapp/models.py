@@ -51,6 +51,7 @@ class Payment(models.Model):
     # organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     month = models.DateField()
+    paymentdate = models.DateField(null=True)
 
     def __str__(self):
         return f'{self.student.user_profile.user.username} - {self.month.strftime("%Y-%m")}'
@@ -60,6 +61,7 @@ class Transaction(models.Model):
     # organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     month = models.DateField()
+    paymentdate = models.DateField(null=True)
 
     def __str__(self):
         return f'{self.organizationsubscription.organization.name} - {self.month.strftime("%Y-%m")}'

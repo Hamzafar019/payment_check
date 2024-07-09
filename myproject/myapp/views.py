@@ -32,30 +32,32 @@ def organizationtransaction_check_required(view_func):
             total_amount=amount*total_students
             while current_date <= end_date:
                 month_str = current_date.strftime("%Y-%m-%d")
+                end_month=end_date.strftime("%Y-%m-%d")
+                end_object= datetime.strptime(end_month, '%Y-%m-%d').date()
                 date_obj = datetime.strptime(month_str, '%Y-%m-%d').date()
                 transaction_count = Transaction.objects.filter(
                     organizationsubscription=subscription,
                     month__month=date_obj.month,
                 ).count()
-
-                if transaction_count == 0:
-                    # Redirect to student_view_paymenthistory if more than 1 payment exists
-                    redirect_url= reverse('organization_view_paymenthistory') + '?alert=clear_dues'
+                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
                     
-                    return redirect(redirect_url)
-                
-                transaction = Transaction.objects.filter(
-                    organizationsubscription=subscription,
-                    month__month=date_obj.month,
-                ).first()
-                if(transaction_count!=0):
-                    # print(transaction.amount,transaction.id)
-                    payment=transaction.amount
-                    total_amount_float = float(total_amount)
-                    if(payment<(.75*total_amount_float)):
-                        redirect_url= reverse('login') + '?alert=less_payment'
+                    if transaction_count == 0:
+                        redirect_url= reverse('organization_view_paymenthistory') + '?alert=clear_dues'
                         
                         return redirect(redirect_url)
+                    
+                    transaction = Transaction.objects.filter(
+                        organizationsubscription=subscription,
+                        month__month=date_obj.month,
+                    ).first()
+                    if(transaction_count!=0):
+                        # print(transaction.amount,transaction.id)
+                        payment=transaction.amount
+                        total_amount_float = float(total_amount)
+                        if(payment<(.75*total_amount_float)):
+                            redirect_url= reverse('login') + '?alert=less_payment'
+                            
+                            return redirect(redirect_url)
 
                 current_date += relativedelta(months=1)
                 
@@ -87,30 +89,34 @@ def studentorganizationtransaction_check_required(view_func):
             while current_date <= end_date:
                 month_str = current_date.strftime("%Y-%m-%d")
                 date_obj = datetime.strptime(month_str, '%Y-%m-%d').date()
+                
+                end_month=end_date.strftime("%Y-%m-%d")
+                end_object= datetime.strptime(end_month, '%Y-%m-%d').date()
                 transaction_count = Transaction.objects.filter(
                     organizationsubscription=subscription,
                     month__month=date_obj.month,
                 ).count()
+                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
 
-                if transaction_count == 0:
-                    # Redirect to student_view_paymenthistory if more than 1 payment exists
-                    redirect_url= reverse('login') + '?alert=organization_clear_dues'
-                    
-                    return redirect(redirect_url)
-                
-                transaction = Transaction.objects.filter(
-                    organizationsubscription=subscription,
-                    month__month=date_obj.month,
-                ).first()
-                if(transaction_count!=0):
-                    # print(transaction.amount,transaction.id)
-                    # print("\n\n\n\najeeb")
-                    payment=transaction.amount
-                    total_amount_float = float(total_amount)
-                    if(payment<(.75*total_amount_float)):
-                        redirect_url= reverse('login') + '?alert=less_payment'
+                    if transaction_count == 0:
+                        # Redirect to student_view_paymenthistory if more than 1 payment exists
+                        redirect_url= reverse('login') + '?alert=organization_clear_dues'
                         
                         return redirect(redirect_url)
+                    
+                    transaction = Transaction.objects.filter(
+                        organizationsubscription=subscription,
+                        month__month=date_obj.month,
+                    ).first()
+                    if(transaction_count!=0):
+                        # print(transaction.amount,transaction.id)
+                        # print("\n\n\n\najeeb")
+                        payment=transaction.amount
+                        total_amount_float = float(total_amount)
+                        if(payment<(.75*total_amount_float)):
+                            redirect_url= reverse('login') + '?alert=less_payment'
+                            
+                            return redirect(redirect_url)
 
                 current_date += relativedelta(months=1)
                 
@@ -142,6 +148,9 @@ def payment_check_required(view_func):
             while current_date <= end_date:
                 month_str = current_date.strftime("%Y-%m-%d")
                 date_obj = datetime.strptime(month_str, '%Y-%m-%d').date()
+                
+                end_month=end_date.strftime("%Y-%m-%d")
+                end_object= datetime.strptime(end_month, '%Y-%m-%d').date()
                 transaction_count = Payment.objects.filter(
                     student=student,
                     organizationsubscription=subscription,
@@ -149,14 +158,16 @@ def payment_check_required(view_func):
                 ).count()
                 # print("FFFF\n\n\n")
                 # print(transaction_count)
-                if transaction_count == 0:
+                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
 
-                    # Redirect to student_view_paymenthistory if more than 1 payment exists
-                    redirect_url= reverse('student_view_paymenthistory') + '?alert=clear_dues'
-                    
-                    return redirect(redirect_url)
+                    if transaction_count == 0:
 
-                current_date += relativedelta(months=1)
+                        # Redirect to student_view_paymenthistory if more than 1 payment exists
+                        redirect_url= reverse('student_view_paymenthistory') + '?alert=clear_dues'
+                        
+                        return redirect(redirect_url)
+
+                    current_date += relativedelta(months=1)
                 
         # If no condition is met, continue with the original view function
         return view_func(request, *args, **kwargs)
@@ -351,6 +362,7 @@ def make_studentpayment(request, subscription_id, month):
             student=student,
             month=date_obj,
             amount=amount,
+            paymentdate=datetime.now().date()
         )
 
         # Deduct the amount from the organization's total payment
@@ -376,6 +388,7 @@ def make_payment(request, subscription_id, month):
             organizationsubscription=subscription,
             month=date_obj,
             amount=amount,
+            paymentdate=datetime.now().date()
         )
 
         return redirect('organization_view_paymenthistory')

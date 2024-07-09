@@ -1,46 +1,116 @@
+
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Payment History</title>
-    
-    <script>
-        window.onload = function() {
-            const alertMessage = "{{ alert_message }}";
-            if (alertMessage) {
-                alert(alertMessage);
-            }
-        };
-    </script>
+	<title>Payment History</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: #f9f9f9;
+			color: #333;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 20px;
+		}
+		
+		h1, h2 {
+			color: #337ab7;
+			margin-bottom: 10px;
+		}
+		
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			margin-bottom: 20px;
+		}
+		
+		th, td {
+			border: 1px solid #ddd;
+			padding: 10px;
+			text-align: left;
+		}
+		
+		th {
+			background: #f0f0f0;
+		}
+		
+		td {
+			border-top: 1px solid #fff;
+		}
+		
+		form {
+			margin-top: 20px;
+		}
+		
+		input[type="text"] {
+			padding: 10px;
+			margin-bottom: 10px;
+			border: 1px solid #ccc;
+			width: 100%;
+		}
+		
+		button[type="submit"] {
+			background: #337ab7;
+			color: #fff;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		
+		button[type="submit"]:hover {
+			background: #23527c;
+		}
+		
+		a {
+			text-decoration: none;
+			color: #337ab7;
+		}
+		
+		a:hover {
+			color: #23527c;
+		}
+	</style>
+	<script>
+		window.onload = function() {
+			const alertMessage = "{{ alert_message }}";
+			if (alertMessage) {
+				alert(alertMessage);
+			}
+		};
+	</script>
 </head>
 <body>
-    <h1>Payment History</h1>
-    
-    {% for subscription in subscription_data %}
-        <h2>{{ subscription.subscription_name }}</h2>
-        <p>Subscription Price: {{ subscription.subscription_price }}</p>
-        <table border="1">
-            <tr>
-                <th>Month</th>
-                <th>Transaction Status</th>
-                <th>Action</th>
-            </tr>
-            {% for month_data in subscription.months %}
-                <tr>
-                    <td>{{ month_data.month }}</td>
-                    <td>{{ month_data.transaction|yesno:"Completed,Pending" }}</td>
-                    <td>
-                        {% if not month_data.transaction %}
-                            <form method="post" action="{% url 'make_payment' subscription.subscription_id month_data.month %}">
-                                {% csrf_token %}
-                                
-                                <input type="text" name="payment_amount" placeholder="{{ subscription.subscription_price }} * {{total_students}}" required>
-                                <button type="submit">Make Payment</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endfor %}
+	<h1>Payment History</h1>
+	<a href="{% url 'logout' %}">Log Out</a>
+	{% for subscription in subscription_data %}
+		<h2>{{ subscription.subscription_name }}</h2>
+		<p>Subscription Price: {{ subscription.subscription_price }}</p>
+		<table border="1">
+			<tr>
+				<th>Month</th>
+				<th>Transaction Status</th>
+				<th>Action</th>
+			</tr>
+			{% for month_data in subscription.months %}
+				<tr>
+					<td>{{ month_data.month }}</td>
+					<td>{{ month_data.transaction|yesno:"Completed,Pending" }}</td>
+					<td>
+						{% if not month_data.transaction %}
+							<form method="post" action="{% url 'make_payment' subscription.subscription_id month_data.month %}">
+								{% csrf_token %}
+								<input type="text" name="payment_amount" placeholder="{{ subscription.subscription_price }} * {{total_students}}" required>
+								<button type="submit">Make Payment</button>
+							</form>
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+	{% endfor %}
 </body>
 </html>
+
