@@ -167,7 +167,7 @@ def payment_check_required(view_func):
                         
                         return redirect(redirect_url)
 
-                    current_date += relativedelta(months=1)
+                current_date += relativedelta(months=1)
                 
         # If no condition is met, continue with the original view function
         return view_func(request, *args, **kwargs)
@@ -206,6 +206,7 @@ def organization_signup(request):
 @studentorganizationtransaction_check_required
 @payment_check_required
 def student(request):
+    print("SS\n")
     return render(request, 'student.html')
 
 def superuser(request):
