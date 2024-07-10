@@ -20,7 +20,7 @@ def organizationtransaction_check_required(view_func):
         organization = get_object_or_404(Organization, user=user_profile)
 
         organization_subscriptions = OrganizationSubscription.objects.filter(organization=organization)
-    
+        print("SHIT\n\n\n\n\n")
         total_students = Student.objects.filter(organization=organization).count()
 
         for subscription in organization_subscriptions:
@@ -442,10 +442,11 @@ def user_login(request):
                 if user.userprofile.role == 'student':
                     return redirect('student')
                 elif user.userprofile.role == 'organization':
+                    print("AJEEB")
                     return redirect('organization')  # Redirect to appropriate view for organization
             else:
                 # Handle other roles or scenarios here
-                return redirect('login')  # Redirect to login page with error message
+                return redirect('organization')  # Redirect to login page with error message
         
         else:
             # If user is None, authentication failed
@@ -461,6 +462,7 @@ def user_logout(request):
 
 @organizationtransaction_check_required
 def organization(request):
+    print("ff")
     return render(request, 'organization.html')
 
 @login_required
