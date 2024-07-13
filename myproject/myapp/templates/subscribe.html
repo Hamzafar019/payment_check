@@ -1,12 +1,10 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Create Organization Subscription</title>
-	<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Organization Subscription</title>
+    <style>
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(to right, #4e54c8, #8f94fb);
@@ -19,7 +17,7 @@
             margin: 0;
             text-align: center;
         }
-        h2 {
+        h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
             animation: fadeIn 1s ease-in-out;
@@ -71,6 +69,10 @@
             background: rgba(0, 0, 0, 0.4);
             transform: scale(1.05);
         }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -78,14 +80,19 @@
     </style>
 </head>
 <body>
-	<h1>Create Organization Subscription</h1>
-	<form method="POST">
-		{% csrf_token %}
-		{{ form.as_p }}
-		<button type="submit">Create Subscription</button>
-	</form>
-	<br>
-	<a href="{% url 'logout' %}">Log Out</a>
+    <h1>Create Organization Subscription</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="error-message">{{ form.non_field_errors }}</div>
+        {% endif %}
+        
+
+        {{ form.as_p }}
+        
+        <button type="submit">Create Subscription</button>
+    </form>
+    <br>
+    <a href="{% url 'logout' %}">Log Out</a>
 </body>
 </html>
-

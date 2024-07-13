@@ -39,8 +39,8 @@ def organizationtransaction_check_required(view_func):
                     organizationsubscription=subscription,
                     month__month=date_obj.month,
                 ).count()
-                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
-                    
+                if(end_object.month!=date_obj.month or (end_object.month==date_obj.month and date_obj.day<end_object.day) ):
+                
                     if transaction_count == 0:
                         redirect_url= reverse('organization_view_paymenthistory') + '?alert=clear_dues'
                         
@@ -96,7 +96,7 @@ def studentorganizationtransaction_check_required(view_func):
                     organizationsubscription=subscription,
                     month__month=date_obj.month,
                 ).count()
-                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
+                if(end_object.month!=date_obj.month or (end_object.month==date_obj.month and date_obj.day<end_object.day) ):
 
                     if transaction_count == 0:
                         # Redirect to student_view_paymenthistory if more than 1 payment exists
@@ -158,7 +158,7 @@ def payment_check_required(view_func):
                 ).count()
                 # print("FFFF\n\n\n")
                 # print(transaction_count)
-                if(end_object.month!=date_obj.month and date_obj.day<end_object.day ):
+                if(end_object.month!=date_obj.month or (end_object.month==date_obj.month and date_obj.day<end_object.day)):
 
                     if transaction_count == 0:
 
@@ -216,15 +216,21 @@ def create_subscription(request):
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
         if form.is_valid():
-            # Create a new Subscription object but don't save it yet
-            new_subscription = form.save(commit=False)
-            # Additional processing if needed before saving
-            new_subscription.save()
-            return redirect('superuser')  # Redirect after successful submission
+            # Check if a subscription with the same name already exists
+            name = form.cleaned_data['name']
+            if Subscription.objects.filter(name=name).exists():
+                # Handle the case where subscription with the same name exists
+                form.add_error('name', 'Subscription with this name already exists.')
+            else:
+                # Create a new Subscription object but don't save it yet
+                new_subscription = form.save(commit=False)
+                # Additional processing if needed before saving
+                new_subscription.save()
+                return redirect('superuser')  # Redirect after successful submission
     else:
         form = SubscriptionForm()
 
-    return render(request, 'create_subscription.html', {'form': form}) 
+    return render(request, 'create_subscription.html', {'form': form})
 
 # def organization_payment(request):
     
@@ -366,9 +372,6 @@ def make_studentpayment(request, subscription_id, month):
             paymentdate=datetime.now().date()
         )
 
-        # Deduct the amount from the organization's total payment
-        # organization.total_payment -= amount
-        # organization.save()
 
         return redirect('student_view_paymenthistory')
 
@@ -405,12 +408,23 @@ def subscribe(request):
         if form.is_valid():
 
             
-            organizationsubscription = OrganizationSubscription.objects.create(
-                organization = organization,
-                subscription=form.cleaned_data['subscription'],
-                date_of_subscription=form.cleaned_data['date_of_subscription']
-            )
-            return redirect('organization')  # Redirect after creating student
+            existing_subscription = OrganizationSubscription.objects.filter(
+                organization=organization
+            ).exists()
+            print(existing_subscription)
+            print("\n\n\najeeb")
+            if not existing_subscription:
+                # If no existing subscription, create a new one
+                organizationsubscription = OrganizationSubscription.objects.create(
+                    organization=organization,
+                    subscription=form.cleaned_data['subscription'],
+                    date_of_subscription=form.cleaned_data['date_of_subscription']
+                )
+                return redirect('organization')  # Redirect after creating subscription
+            else:
+                # Handle case where subscription already exists
+                # You may want to add an error message or handle this situation accordingly
+                form.add_error(None, "Subscription already exists for this organization.")
         
 
     else:        
@@ -488,7 +502,7 @@ def create_student(request):
                 user_profile=user_profile,
                 enrollment_date=form.cleaned_data['enrollment_date']
             )
-            return redirect('home')  # Redirect after creating student
+            return redirect('organization')  # Redirect after creating student
     else:
         form = StudentCreationForm(initial={'organization': organization.name})
     
