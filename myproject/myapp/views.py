@@ -20,7 +20,7 @@ def organizationtransaction_check_required(view_func):
         organization = get_object_or_404(Organization, user=user_profile)
 
         organization_subscriptions = OrganizationSubscription.objects.filter(organization=organization)
-        print("SHIT\n\n\n\n\n")
+        # print("SHIT\n\n\n\n\n")
         total_students = Student.objects.filter(organization=organization).count()
 
         for subscription in organization_subscriptions:
@@ -206,7 +206,7 @@ def organization_signup(request):
 @payment_check_required
 @studentorganizationtransaction_check_required
 def student(request):
-    print("SS\n")
+    # print("SS\n")
     return render(request, 'student.html')
 
 def superuser(request):
@@ -411,8 +411,8 @@ def subscribe(request):
             existing_subscription = OrganizationSubscription.objects.filter(
                 organization=organization
             ).exists()
-            print(existing_subscription)
-            print("\n\n\najeeb")
+            # print(existing_subscription)
+            # print("\n\n\najeeb")
             if not existing_subscription:
                 # If no existing subscription, create a new one
                 organizationsubscription = OrganizationSubscription.objects.create(
@@ -456,7 +456,7 @@ def user_login(request):
                 if user.userprofile.role == 'student':
                     return redirect('student')
                 elif user.userprofile.role == 'organization':
-                    print("AJEEB")
+                    # print("AJEEB")
                     return redirect('organization')  # Redirect to appropriate view for organization
             else:
                 # Handle other roles or scenarios here
@@ -476,7 +476,7 @@ def user_logout(request):
 
 @organizationtransaction_check_required
 def organization(request):
-    print("ff")
+    # print("ff")
     return render(request, 'organization.html')
 
 @login_required
